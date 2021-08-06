@@ -1,2 +1,2 @@
 # practice
-My practice algorithm
+My practice algorithm.
