@@ -1,3 +1,4 @@
+import os
 import time
 from threading import Timer
 import random
@@ -25,7 +26,7 @@ class SeuDaKa(object):
         self.login_url = "https://newids.seu.edu.cn/authserver/login?service=http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/*default/index.do"
         # 登出网址
         self.logout_url = "https://newids.seu.edu.cn/authserver/index.do"
-        self.browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome(options=chrome_opt)
 
     def login(self, username, password):
         self.browser.get(self.login_url)
@@ -104,7 +105,9 @@ class SeuDaKa(object):
         # username and password
         print("Start Report")
         # read user.txt as username and password
-        file = open("DailyReport/user.txt")
+        # file = open("DailyReport/user.txt")
+        filename = 'user.txt'
+        file = open(filename)
         user = file.readlines()
         file.close()
         for i in user:
