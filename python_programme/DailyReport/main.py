@@ -25,7 +25,7 @@ class SeuDaKa(object):
         self.login_url = "https://newids.seu.edu.cn/authserver/login?service=http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/*default/index.do"
         # 登出网址
         self.logout_url = "https://newids.seu.edu.cn/authserver/index.do"
-        self.browser = webdriver.Chrome(options=chrome_opt)
+        self.browser = webdriver.Chrome()
 
     def login(self, username, password):
         self.browser.get(self.login_url)
@@ -103,10 +103,13 @@ class SeuDaKa(object):
     def daily_report(self):
         # username and password
         print("Start Report")
-        user = {'213192262': 'wyy13133152596.'}
-        # user.update({'test': 'test'})
-        for username, password in user.items():
-            self.login(username, password)
+        # read user.txt as username and password
+        file = open("DailyReport/user.txt")
+        user = file.readlines()
+        file.close()
+        for i in user:
+            person = i.split(',')
+            self.login(person[0], person[1].split('\n')[0])
             self.report()
             self.logout()
         print("End Report")
