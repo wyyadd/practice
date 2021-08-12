@@ -1,6 +1,5 @@
-import os
 import time
-from threading import Timer
+import schedule
 import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -105,7 +104,7 @@ class SeuDaKa(object):
         # username and password
         print("Start Report")
         # read user.txt as username and password
-        # file = open("DailyReport/user.txt")
+        # filename = 'DailyReport/user.txt'
         filename = 'user.txt'
         file = open(filename)
         user = file.readlines()
@@ -120,7 +119,10 @@ class SeuDaKa(object):
 
 def main():
     test = SeuDaKa()
-    Timer(86400, test.daily_report()).start()
+    schedule.every().day.at("06:00").do(test.daily_report)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 if __name__ == "__main__":
