@@ -6,12 +6,12 @@ public:
 			ans.push_back(result);
 			return;
 		}
-		//skip
-		Get_Answer(ans,result,nums,pos+1);
 		//add element
-		vector<int> temp = result;
-		temp.push_back(nums[pos]);
-		Get_Answer(ans,temp,nums,pos+1);
+		result.push_back(nums[pos]);
+		Get_Answer(ans,result,nums,pos+1);
+		//skip
+		result.pop_back();
+		Get_Answer(ans,result,nums,pos+1);
 	}
 	vector<vector<int>> subsets(vector<int>& nums) {
 		vector<vector<int>> ans;
