@@ -1,0 +1,28 @@
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>50</x><y>250</y><w>270</w><h>110</h></coordinates><panel_attributes>Abstract Class
+Major
+--
+- observers: Arraylist
+--
++ attach(MajotObserver majorObserver) : void
++ detach(MajotObserver majorObserver) : void
++ ChangeName(String name) : void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>40</x><y>480</y><w>280</w><h>80</h></coordinates><panel_attributes>Class
+ConcreteMajor
+--
+
+--
++ ChangeName(String name) : void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>460</x><y>260</y><w>240</w><h>80</h></coordinates><panel_attributes>Interface
+MajorObserver
+--
+
+--
++ UpdateName(String name) : void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>750</x><y>140</y><w>210</w><h>80</h></coordinates><panel_attributes>Class
+Student
+--
+- major : String
+--
++ UpdateName(String name) : void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>750</x><y>390</y><w>220</w><h>80</h></coordinates><panel_attributes>Class
+Teacher
+--
+- major : String
+--
++ UpdateName(String name) : void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>310</x><y>280</y><w>170</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>150;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>160</x><y>350</y><w>30</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>Relation</id><coordinates><x>690</x><y>140</y><w>80</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;130;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>690</x><y>310</y><w>80</w><h>140</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;60;120</additional_attributes></element></diagram>
