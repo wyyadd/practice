@@ -38,8 +38,6 @@ public:
 			return 0;
 		}
 
-
-
 		int Search(vector<int>& array, int left, int right, int x){
       //当左右边界不重合时
       while (left <= right)
@@ -64,8 +62,6 @@ public:
       //如果找不到，则返回-1
       return -1;
 		}
-
-
 
     int search(vector<int>& nums, int target) {
 			int index = FIndIndex(nums);

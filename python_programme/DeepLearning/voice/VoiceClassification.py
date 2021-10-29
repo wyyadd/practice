@@ -89,5 +89,4 @@ class VoiceClassification(nn.Module):
         x = self.biRnn_layers(x)
         x = self.classifier(x)
         x = self.softmax(x)
-
         return x
