@@ -26,7 +26,7 @@ class ResidualCNN(nn.Module):
             CNNLayerNorm(n_feats),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Conv2d(in_channels, out_channels, kernel, stride, padding=kernel // 2)
+            nn.Conv2d(out_channels, out_channels, kernel, stride, padding=kernel // 2)
         )
 
     def forward(self, x):

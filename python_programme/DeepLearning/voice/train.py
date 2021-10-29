@@ -13,6 +13,11 @@ def train_loop(model, dataloader):
     for batch, (images, labels) in enumerate(dataloader):
         images, labels = images.to(device), labels.to(device)
         pred = model(images)
+        print(pred.size())
+        arg_maxes = torch.argmax(pred, dim=2)
+        for i, args in enumerate(arg_maxes):
+            for j, index in enumerate(args):
+                print(j, index.size())
 
 
 if __name__ == "__main__":
@@ -21,7 +26,7 @@ if __name__ == "__main__":
         "n_rnn_layers": 5,
         "rnn_dim": 512,
         "n_class": 220,
-        "n_feats": 256,
+        "n_feats": 40,
         "stride": 2,
         "dropout": 0.1,
         "learning_rate": 5e-4,
