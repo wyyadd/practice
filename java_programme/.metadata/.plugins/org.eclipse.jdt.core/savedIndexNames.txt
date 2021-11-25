@@ -1,3 +1,0 @@
-INDEX VERSION 1.131+/home/wyyadd/coding/java_programme/.metadata/.plugins/org.eclipse.jdt.core
-1686274598.index
-3056369622.index
