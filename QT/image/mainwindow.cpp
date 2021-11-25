@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->setScene(scene);
 }
 
+//展示图片
 void MainWindow::ShowImage(){
     ui->graphicsView->scene()->clear();
     ui->graphicsView->scene()->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(image->getImageData())));
@@ -31,7 +32,7 @@ MainWindow::~MainWindow()
     delete scene;
 }
 
-//打开图像文件
+//打开BMP图像文件
 void MainWindow::on_pushButton_clicked(){
     //删除之前的
     if(image != nullptr)
@@ -46,6 +47,22 @@ void MainWindow::on_pushButton_clicked(){
         ui->graphicsView->scene()->clear();
         image = nullptr;
     }
+}
+
+//打开raw图像
+void MainWindow::on_pushButton_7_clicked(){
+    //删除之前的
+    if(image != nullptr)
+        delete image;
+    ImageAddress = QFileDialog::getOpenFileName
+            (this,tr("Open Image"), "/home/wyyadd", tr("Image Files (*.raw)"));
+    if(!ImageAddress.isNull()){
+        image = new MyImage(ImageAddress);
+    }
+    else{
+        image = nullptr;
+    }
+    ui->graphicsView->scene()->clear();
 }
 
 //保存图像文件
@@ -68,6 +85,10 @@ void MainWindow::on_pushButton_2_clicked(){
 
 //重置图像
 void MainWindow::on_pushButton_3_clicked(){
+    if(image != nullptr && (image->type == "raw0" || image->type == "raw1")){
+        QMessageBox::information(NULL, "失败", "raw图像请点击映射重置", QMessageBox::Yes);
+        return;
+    }
     //删除之前的
     if(image != nullptr)
         delete image;
@@ -81,6 +102,10 @@ void MainWindow::on_pushButton_3_clicked(){
 void MainWindow::on_pushButton_4_clicked(){
     if(image == nullptr){
         QMessageBox::information(NULL, "失败", "未指定图片", QMessageBox::Yes);
+        return;
+    }
+    if(image->type == "raw0"){
+        QMessageBox::information(NULL, "失败", "请先映射", QMessageBox::Yes);
         return;
     }
     double x = ui->lineEdit_3->text().toDouble();
@@ -99,6 +124,10 @@ void MainWindow::on_pushButton_5_clicked(){
         QMessageBox::information(NULL, "失败", "未指定图片", QMessageBox::Yes);
         return;
     }
+    if(image->type == "raw0"){
+        QMessageBox::information(NULL, "失败", "请先映射", QMessageBox::Yes);
+        return;
+    }
     double pi = 3.1415926;
     double m = ui->lineEdit_5->text().toDouble();
     image->Rotation(m*pi/180);
@@ -112,10 +141,50 @@ void MainWindow::on_pushButton_6_clicked(){
         QMessageBox::information(NULL, "失败", "未指定图片", QMessageBox::Yes);
         return;
     }
+    if(image->type == "raw0"){
+        QMessageBox::information(NULL, "失败", "请先映射", QMessageBox::Yes);
+        return;
+    }
     int x = ui->lineEdit->text().toDouble();
     int y = ui->lineEdit_2->text().toDouble();
     image->Translation((int)x,(int)y);
     ShowImage();
 }
+
+//灰度窗
+void MainWindow::on_pushButton_8_clicked(){
+    if(image == nullptr){
+        QMessageBox::information(NULL, "失败", "未指定RAW图片", QMessageBox::Yes);
+        return;
+    }
+   long pos = ui->lineEdit_6->text().toLong();
+   long width= ui->lineEdit_7->text().toLong();
+   if(pos <= 0 || width <= 0){
+        QMessageBox::information(NULL, "失败", "参数必须为正数", QMessageBox::Yes);
+        return;
+   }
+   if(image->windowsMapping(pos,width))
+     ShowImage();
+   else
+    QMessageBox::information(NULL, "失败", "请检查参数是否正确", QMessageBox::Yes);
+}
+
+//细节增强
+void MainWindow::on_pushButton_9_clicked(){
+    if(image == nullptr){
+        QMessageBox::information(NULL, "失败", "未指定图片", QMessageBox::Yes);
+        return;
+    }
+    if(image->type == "raw0"){
+        QMessageBox::information(NULL, "失败", "请先映射", QMessageBox::Yes);
+        return;
+    }
+    double alpha = ui->lineEdit_8->text().toDouble();
+    if(alpha == 0) alpha = 1;
+    image->GaussianFilter();
+    image->UnsharpMasking(alpha);
+    ShowImage();
+}
+
 
 

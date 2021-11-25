@@ -32,5 +32,9 @@ private slots:
    void on_pushButton_4_clicked(); //缩放图像
    void on_pushButton_5_clicked(); //旋转图像
    void on_pushButton_6_clicked(); //平移图像
+   void on_pushButton_7_clicked(); //打开raw图像
+   void on_pushButton_8_clicked(); //灰度窗映射
+   void on_pushButton_9_clicked(); //细节增强
+
 };
 #endif // MAINWINDOW_H

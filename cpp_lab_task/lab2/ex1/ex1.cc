@@ -1,4 +1,5 @@
 #include <iostream>
+
 using namespace std;
 class Complex;
 istream &operator>>(istream &input, Complex &a);
