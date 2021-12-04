@@ -6,220 +6,343 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
-    <height>665</height>
+    <width>1229</width>
+    <height>786</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>图像处理实验</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QFrame" name="frame">
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>10</y>
-      <width>971</width>
-      <height>641</height>
+      <x>0</x>
+      <y>0</y>
+      <width>1231</width>
+      <height>791</height>
      </rect>
     </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QPushButton" name="pushButton">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>590</y>
-       <width>91</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>打开图像</string>
-     </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>LAB1,2,3</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="geometry">
+       <rect>
+        <x>1070</x>
+        <y>210</y>
+        <width>89</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>缩放</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_6">
+      <property name="geometry">
+       <rect>
+        <x>1070</x>
+        <y>90</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>平移</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_3">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>150</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="readOnly">
+       <bool>false</bool>
+      </property>
+      <property name="placeholderText">
+       <string>竖直缩放</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>710</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>打开BMP图像</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_4">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>180</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>水平缩放</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_5">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>270</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>旋转角度（度）</string>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="geometry">
+       <rect>
+        <x>770</x>
+        <y>710</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>重置图像</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_5">
+      <property name="geometry">
+       <rect>
+        <x>1070</x>
+        <y>310</y>
+        <width>89</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>旋转</string>
+      </property>
+     </widget>
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>1041</width>
+        <height>691</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>710</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>保存图像</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>50</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>水平移动距离</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>20</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>竖直移动距离</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_7">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>710</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>打开raw图像</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_6">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>380</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="inputMask">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>窗位</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_7">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>410</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>窗宽</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_8">
+      <property name="geometry">
+       <rect>
+        <x>1070</x>
+        <y>440</y>
+        <width>89</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>映射</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_9">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>510</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>细节增强</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_8">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>540</y>
+        <width>113</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>alpha(defalt=1)</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_10">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>590</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>特征提取</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>10</y>
-       <width>811</width>
-       <height>581</height>
-      </rect>
-     </property>
-     <property name="autoFillBackground">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="geometry">
-      <rect>
-       <x>390</x>
-       <y>590</y>
-       <width>91</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>保存图像</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_3">
-     <property name="geometry">
-      <rect>
-       <x>600</x>
-       <y>590</y>
-       <width>101</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>重置图像</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_4">
-     <property name="geometry">
-      <rect>
-       <x>860</x>
-       <y>304</y>
-       <width>89</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>缩放</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="geometry">
-      <rect>
-       <x>860</x>
-       <y>480</y>
-       <width>89</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>旋转</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_6">
-     <property name="geometry">
-      <rect>
-       <x>860</x>
-       <y>120</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>平移</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit">
-     <property name="geometry">
-      <rect>
-       <x>850</x>
-       <y>40</y>
-       <width>113</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>竖直移动距离</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_2">
-     <property name="geometry">
-      <rect>
-       <x>850</x>
-       <y>80</y>
-       <width>113</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>水平移动距离</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_3">
-     <property name="geometry">
-      <rect>
-       <x>850</x>
-       <y>210</y>
-       <width>113</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="inputMask">
-      <string/>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="readOnly">
-      <bool>false</bool>
-     </property>
-     <property name="placeholderText">
-      <string>竖直缩放</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_4">
-     <property name="geometry">
-      <rect>
-       <x>850</x>
-       <y>260</y>
-       <width>113</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>水平缩放</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_5">
-     <property name="geometry">
-      <rect>
-       <x>850</x>
-       <y>440</y>
-       <width>111</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="inputMask">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>旋转角度（度）</string>
-     </property>
-     <property name="clearButtonEnabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>LAB4</string>
+     </attribute>
+     <widget class="QGraphicsView" name="graphicsView_2">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>10</y>
+        <width>881</width>
+        <height>591</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
