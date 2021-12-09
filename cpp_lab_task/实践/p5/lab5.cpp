@@ -5,11 +5,11 @@
 #include <time.h>
 #include <thread>
 #include <future>
-// #include <parallel/losertree.h> 
+#include <parallel/losertree.h> 
 #include <assert.h>
 
 
-namespace lab4{
+namespace lab5{
 using std::string;
 
 int feedInput(std::ifstream *infile, int *arr, int input_size){
@@ -237,10 +237,10 @@ int main()
     clock_t start = clock();
     // 读输入文件， 生成初始的runs
     // 分配每个run临时的输出文件
-    lab4::createInitialRuns(input_file, run_size, num_ways);
+    lab5::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    lab4::mergeFiles(num_ways, 0, input_size, output_size);
+    lab5::mergeFiles(num_ways, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;
