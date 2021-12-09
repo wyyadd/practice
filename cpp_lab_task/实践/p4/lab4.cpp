@@ -107,14 +107,15 @@ void createInitialRuns(string input_file, int run_size, int num_ways){
         });
         t_write.join();
         num = t_read.get();
+        std::swap(treeBuffer, diskBuffer_input);
         // for(int i = 0; i < num; ++i){
         //     outfile[next_output_file] << diskBuffer_output[i] << std::endl;
         // }
 
         if(num != run_size){
             assert(infile.eof());
-            std::swap(treeBuffer,diskBuffer_input);
             std::sort(treeBuffer,treeBuffer+run_size);
+            std::swap(treeBuffer,diskBuffer_output);
             for(int i = 0; i < num; ++i)
                 outfile[next_output_file] << diskBuffer_output[i] << std::endl;
             break;
@@ -216,10 +217,10 @@ int main()
     int run_size = 2000;
 
     // input size
-    int input_size = 100;
+    int input_size = 500;
 
     // output_size
-    int output_size = 1000;
+    int output_size = 500;
  
     std::string input_file = "input.txt";
  
@@ -240,7 +241,7 @@ int main()
     lab4::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    //lab4::mergeFiles(num_ways, 0, input_size, output_size);
+    lab4::mergeFiles(num_ways, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;
