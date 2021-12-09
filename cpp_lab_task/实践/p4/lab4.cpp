@@ -4,63 +4,14 @@
 #include <fstream>
 #include <vector>
 #include <time.h>
- 
-namespace lab3{
-using std::string;
-// 使用merge sort， 生成runs， 并生成到临时的输出文件中
-void createInitialRuns(string input_file, int run_size, int num_ways){
-    // 打开输入文件
-    std::ifstream infile(input_file, std::ios::in);
- 
-    // 输出临时文件array
-    std::ofstream outfile[num_ways];
-    for (int i = 0; i < num_ways; i++)
-    {
-        // 输出临时文件
-        outfile[i].open("epoch_0_run_"+std::to_string(i), std::ios::out);
-    }
- 
-    // new一个数组
-    int* arr = new int[run_size];
- 
-    bool more_input = true;
-    int next_output_file = 0;
- 
-    int i;
-    while (more_input)
-    {
-        // 将run_size个元素写入arr中
-        for (i = 0; i < run_size; i++)
-        {
-            if (infile.eof())
-            {
-                --i;
-                more_input = false;
-                break;
-            }
-            infile >> arr[i];
-        }
- 
-        // 排序
-        std::sort(arr, arr + i);
- 
-        // 写到临时输出文件
-        for (int j = 0; j < i; j++) {
-            outfile[next_output_file] << arr[j] << std::endl;
-        }
-        next_output_file++;
-    }
- 
-    // deallocate memory
-    delete arr;
- 
-    // close the input and output files
-    for (int i = 0; i < num_ways; i++) {
-        outfile[i].close();
-    }
+#include <thread>
+#include <future>
+#include <parallel/losertree.h> 
+#include <assert.h>
 
-    infile.close();
-}
+
+namespace lab4{
+using std::string;
 
 int feedInput(std::ifstream *infile, int *arr, int input_size){
     int i = 0;
@@ -81,6 +32,110 @@ void writeDisk(string name, std::priority_queue<int, std::vector<int>, std::grea
         heap->pop();
     }
     outfile.close();
+}
+
+// 使用merge sort， 生成runs， 并生成到临时的输出文件中
+void createInitialRuns(string input_file, int run_size, int num_ways){
+    // 打开输入文件
+    std::ifstream infile(input_file, std::ios::in);
+ 
+    // 输出临时文件array
+    std::ofstream outfile[num_ways];
+    for (int i = 0; i < num_ways; i++)
+    {
+        // 输出临时文件
+        outfile[i].open("epoch_0_run_"+std::to_string(i), std::ios::out);
+    }
+ 
+    // 创建三个缓存
+    int *treeBuffer = new int[run_size];
+    int *diskBuffer_input = new int[run_size];
+    int *diskBuffer_output= new int[run_size];
+
+    /**
+    // loser tree
+    constexpr int num_nodes = 10;
+    std::less<int> compare;
+    __gnu_parallel::_LoserTree<true, int, std::less<int>> loser_tree(num_nodes, compare);
+    int treenodes[num_nodes]; 
+    // init loser tree
+    for(int i = 0; i < num_nodes; ++i){
+        int key;
+        infile >> key;
+        treenodes[i] = key;
+        loser_tree.__insert_start(key, i, false);
+    }
+    loser_tree.__init();
+    */
+ 
+    // flag
+    bool more_input = true;
+    int next_output_file = 0;
+ 
+    int num = feedInput(&infile, treeBuffer, run_size);
+    while (true)
+    {
+        // init diskBuffer_input
+        // num = num of readed numbers
+
+        std::future<int> t_read = std::async(feedInput, &infile, diskBuffer_input, run_size);
+
+        // exchange treeBuffer and diskBuffer_input
+        // std::swap(treeBuffer,diskBuffer_input);
+
+        // use loser tree to feed diskBuffer_output
+        /**
+        for(int i = 0; i < num; ++i){
+            int index = loser_tree.__get_min_source();
+            loser_tree.__delete_min_insert(treeBuffer[i], false);
+            std::swap(treeBuffer[i],treenodes[index]);
+        }
+        */
+
+        // sort treeBuffer
+        std::thread t_sort([&](){std::sort(treeBuffer,treeBuffer+run_size);});
+        // std::sort(treeBuffer,treeBuffer + run_size);
+
+        t_sort.join();
+        // exchange treeBuffer and diskBuffer_output
+        std::swap(treeBuffer,diskBuffer_output);
+
+        // write to disk
+        std::thread t_write([&](){
+            for(int i = 0; i < num; ++i)
+                outfile[next_output_file] << diskBuffer_output[i] << std::endl;
+        });
+        t_write.join();
+        num = t_read.get();
+        // for(int i = 0; i < num; ++i){
+        //     outfile[next_output_file] << diskBuffer_output[i] << std::endl;
+        // }
+
+        if(num != run_size){
+            assert(infile.eof());
+            std::swap(treeBuffer,diskBuffer_input);
+            std::sort(treeBuffer,treeBuffer+run_size);
+            for(int i = 0; i < num; ++i)
+                outfile[next_output_file] << diskBuffer_output[i] << std::endl;
+            break;
+        }
+        next_output_file++;
+    }
+
+    // for(int i = 0; i < num_nodes; ++i){
+    //     outfile[next_output_file] << treenodes[loser_tree.__get_min_source()] << std::endl;
+    //     loser_tree.__delete_min_insert(INT32_MAX,false);
+    // }
+ 
+    // close the input and output files
+    for (int i = 0; i < num_ways; i++) {
+        outfile[i].close();
+    }
+
+    infile.close();
+    delete []diskBuffer_output;
+    delete []diskBuffer_input;
+    delete []treeBuffer;
 }
 
 // num = num of runs
@@ -158,10 +213,10 @@ int main()
     int num_ways = 10;
  
     // 每块的大小
-    int run_size = 10000;
+    int run_size = 2000;
 
     // input size
-    int input_size = 500;
+    int input_size = 100;
 
     // output_size
     int output_size = 1000;
@@ -182,10 +237,10 @@ int main()
     clock_t start = clock();
     // 读输入文件， 生成初始的runs
     // 分配每个run临时的输出文件
-    lab3::createInitialRuns(input_file, run_size, num_ways);
+    lab4::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    lab3::mergeFiles(num_ways, 0, input_size, output_size);
+    //lab4::mergeFiles(num_ways, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;
