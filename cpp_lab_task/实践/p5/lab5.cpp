@@ -136,6 +136,7 @@ void createInitialRuns(string input_file, int run_size, int num_ways){
 }
 
 // num = num of runs
+// k = k way merge
 void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
     // end condition
     if(num == 1){
@@ -149,7 +150,8 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
     for(i = 0; i < num; i+=k){   
         // input buffer
         int input_buffer[k][input_size];
-        int input_pos[input_size] = {1};
+        int input_pos[input_size];
+        std::fill(input_pos, input_pos+input_size, 0);
         // output buffer
         int *output_buffer_tree = new int[output_size];
         int *output_buffer_disk = new int[output_size];
@@ -161,7 +163,7 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
         std::less<int> compare;
         __gnu_parallel::_LoserTree<true, int, std::less<int>> loser_tree(num_of_reamin_runs, compare);
         // create infile stream
-        std::ifstream infile[std::min(num_of_reamin_runs,k)];
+        std::ifstream infile[num_of_reamin_runs];
         for(int j = 0; j < std::min(num_of_reamin_runs,k); ++j){
             infile[j].open(prefix+std::to_string(i+j), std::ios::in);
         }
@@ -185,6 +187,7 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
                 // feed buffer
                 int size = feedInput(&infile[index],input_buffer[index], input_size);
                 if(size == 0){
+                    assert(infile[index].eof());
                     std::fill(input_buffer[index], input_buffer[index]+input_size, INT32_MAX);
                     input_pos[index] = 0;
                     ++flag;
@@ -193,11 +196,11 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
                     if(size != input_size){
                         // if cannot fill up buffer
                         // move fisrt valid numbers to the end of array which means shrink the buffer size
-                        int start = input_size - size - 1;
+                        int start = input_size - size;
                         for(int j = 0; j < size; ++j){
                             input_buffer[index][start+j] = input_buffer[index][j];
                         }
-                        input_pos[index]= start;
+                        input_pos[index] = start;
                     }
                     else
                         input_pos[index] = 0;
@@ -210,11 +213,13 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
                 std::swap(output_buffer_tree, output_buffer_disk);
                 // write to disk 
                 writeDisk(new_name, output_buffer_disk, output_size);
+                output_po = 0;
             }
         } 
         // final writeDisk
         std::swap(output_buffer_tree, output_buffer_disk);
         writeDisk(new_name,output_buffer_disk, output_po);
+
         // close file
         for(int j = 0; j < num_of_reamin_runs; ++j){
             infile[j].close();
@@ -237,7 +242,7 @@ int main()
     int run_size = 2000;
 
     // input size
-    int input_size = 500;
+    int input_size = 50;
 
     // output_size
     int output_size = 500;
@@ -250,7 +255,7 @@ int main()
  
     // 生成输入文件
     for (int i = 0; i < num_ways * run_size; i++) {
-        outfile << rand() - 1 << std::endl;
+        outfile << rand() << std::endl;
     }
  
     outfile.close();
@@ -261,7 +266,7 @@ int main()
     lab5::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    lab5::mergeFiles(num_ways, 2, 0, input_size, output_size);
+    lab5::mergeFiles(num_ways, 8, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;
