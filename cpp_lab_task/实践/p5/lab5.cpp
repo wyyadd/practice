@@ -23,13 +23,10 @@ int feedInput(std::ifstream *infile, int *arr, int input_size){
     return i;
 }
 
-void writeDisk(string name, std::priority_queue<int, std::vector<int>, std::greater<int>> *heap, int heap_size){
+void writeDisk(string name, int *arr, int size){
     std::ofstream outfile(name, std::ios::app);
-    while (!heap->empty())
-    {
-        outfile << heap->top() << std::endl;
-        heap->pop();
-    }
+    for(int i = 0; i < size; ++i)
+        outfile << arr[i] << std::endl;
     outfile.close();
 }
 
@@ -139,73 +136,97 @@ void createInitialRuns(string input_file, int run_size, int num_ways){
 }
 
 // num = num of runs
-void mergeFiles(int num, int epoch, int input_size, int output_size){
+void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
     // end condition
     if(num == 1){
         return;
     }
     string prefix = "epoch_" + std::to_string(epoch) + "_run_";
     ++epoch;
-    // input buffer
-    int input_1[input_size]; int po_1 = 0;
-    int input_2[input_size]; int po_2 = 0;
-    // output buffer
-    std::priority_queue<int, std::vector<int>, std::greater<int>> heap; int heap_size = 0;
+
+    // k-way merge
     int i;
-    for(i = 0; i < num-1; i+=2){
-        string new_name= "epoch_" + std::to_string(epoch) + "_run_" + std::to_string(i/2);
-        // read runs
-        std::ifstream ifstream1(prefix+std::to_string(i), std::ios::in);
-        std::ifstream ifstream2(prefix+std::to_string(i+1), std::ios::in);
-        while (!ifstream1.eof() || !ifstream2.eof()){
-            // po_1 = size of input buffer
-            po_1 = feedInput(&ifstream1, input_1, input_size);
-            po_2 = feedInput(&ifstream2, input_2, input_size);
-            for(int k = 0; k < std::max(po_1, po_2); ++k){
-                if(k < po_1){
-                    heap.emplace(input_1[k]);
-                    ++ heap_size;
-                    if(heap_size == output_size){
-                        // write to disk
-                        writeDisk(new_name,&heap, heap_size);
-                        heap_size = 0;
-                    }
+    for(i = 0; i < num; i+=k){   
+        // input buffer
+        int input_buffer[k][input_size];
+        int input_pos[input_size] = {1};
+        // output buffer
+        int *output_buffer_tree = new int[output_size];
+        int *output_buffer_disk = new int[output_size];
+        int output_po = 0;
+        string new_name= "epoch_" + std::to_string(epoch) + "_run_" + std::to_string(i/k);
+        // num_of_remain runs means in this loop, the number of runs to merge
+        int num_of_reamin_runs =  std::min(num-i,k);
+        // loser tree
+        std::less<int> compare;
+        __gnu_parallel::_LoserTree<true, int, std::less<int>> loser_tree(num_of_reamin_runs, compare);
+        // create infile stream
+        std::ifstream infile[std::min(num_of_reamin_runs,k)];
+        for(int j = 0; j < std::min(num_of_reamin_runs,k); ++j){
+            infile[j].open(prefix+std::to_string(i+j), std::ios::in);
+        }
+        // init input buffer and loser tree
+        for(int j = 0; j < num_of_reamin_runs; ++j){
+            feedInput(&infile[j], input_buffer[j],input_size);
+            loser_tree.__insert_start(input_buffer[j][0],j,false);
+        }
+        loser_tree.__init();
+        // flag is the number of run which reach end
+        int flag = 0;
+        // loop to feed loser tree and output buffer 
+        while(flag != num_of_reamin_runs) 
+        {
+            // min number index
+            int index = loser_tree.__get_min_source();
+            // put it into output buffer 
+            output_buffer_tree[output_po++] = input_buffer[index][input_pos[index]++];
+            // check if input buffer is empty 
+            if(input_pos[index] == input_size){
+                // feed buffer
+                int size = feedInput(&infile[index],input_buffer[index], input_size);
+                if(size == 0){
+                    std::fill(input_buffer[index], input_buffer[index]+input_size, INT32_MAX);
+                    input_pos[index] = 0;
+                    ++flag;
                 }
-                if(k < po_2){
-                    heap.emplace(input_2[k]);
-                    ++ heap_size;
-                    if(heap_size == output_size){
-                        // write to disk
-                        writeDisk(new_name,&heap,heap_size);
-                        heap_size = 0;
+                else{
+                    if(size != input_size){
+                        // if cannot fill up buffer
+                        // move fisrt valid numbers to the end of array which means shrink the buffer size
+                        int start = input_size - size - 1;
+                        for(int j = 0; j < size; ++j){
+                            input_buffer[index][start+j] = input_buffer[index][j];
+                        }
+                        input_pos[index]= start;
                     }
+                    else
+                        input_pos[index] = 0;
                 }
             }
-        }
-        // write to disk
-        writeDisk(new_name,&heap,heap_size);
-        heap_size = 0;
+            // delete min and put new
+            loser_tree.__delete_min_insert(input_buffer[index][input_pos[index]], false);
+            // check if outputbuffer full
+            if(output_po == output_size){
+                std::swap(output_buffer_tree, output_buffer_disk);
+                // write to disk 
+                writeDisk(new_name, output_buffer_disk, output_size);
+            }
+        } 
+        // final writeDisk
+        std::swap(output_buffer_tree, output_buffer_disk);
+        writeDisk(new_name,output_buffer_disk, output_po);
         // close file
-        ifstream1.close();
-        ifstream2.close();
+        for(int j = 0; j < num_of_reamin_runs; ++j){
+            infile[j].close();
+        }
+        delete []output_buffer_tree;
+        delete []output_buffer_disk;
     } 
-    if(i == num)
-        return mergeFiles( num/2, epoch, input_size, output_size);
-        // even
-    else{
-        // odd
-        string new_name= "epoch_" + std::to_string(epoch) + "_run_" + std::to_string(i/2);
-        // copy
-        std::ofstream outfile(new_name, std::ios::out);
-        std::ifstream infile(prefix+std::to_string(i), std::ios::in);
-        outfile << infile.rdbuf();
-        infile.close();
-        outfile.close();
-        return mergeFiles(num/2+1, epoch, input_size, output_size);
-    }
+    
+    return mergeFiles(i/k, k, epoch, input_size, output_size);
 }
 
-} // namespace lab4
+} // namespace lab5
 
 int main()
 {
@@ -229,7 +250,7 @@ int main()
  
     // 生成输入文件
     for (int i = 0; i < num_ways * run_size; i++) {
-        outfile << rand() << std::endl;
+        outfile << rand() - 1 << std::endl;
     }
  
     outfile.close();
@@ -240,7 +261,7 @@ int main()
     lab5::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    lab5::mergeFiles(num_ways, 0, input_size, output_size);
+    lab5::mergeFiles(num_ways, 2, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;
