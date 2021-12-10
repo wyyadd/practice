@@ -65,7 +65,6 @@ void createInitialRuns(string input_file, int run_size, int num_ways){
     */
  
     // flag
-    bool more_input = true;
     int next_output_file = 0;
  
     int num = feedInput(&infile, treeBuffer, run_size);
@@ -149,7 +148,10 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
     int i;
     for(i = 0; i < num; i+=k){   
         // input buffer
-        int input_buffer[k][input_size];
+        int** input_buffer = new int* [k];
+        for(int j = 0; j < k; ++j)
+            input_buffer[j] = new int[input_size];
+        // int input_buffer[k][input_size];
         int input_pos[input_size];
         std::fill(input_pos, input_pos+input_size, 0);
         // output buffer
@@ -167,9 +169,18 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
         for(int j = 0; j < std::min(num_of_reamin_runs,k); ++j){
             infile[j].open(prefix+std::to_string(i+j), std::ios::in);
         }
-        // init input buffer and loser tree
+        // create init buffer thread and feed input buffer
+        std::thread t_writeDisk;
+        std::thread t_init_inputBuffer[num_of_reamin_runs];
         for(int j = 0; j < num_of_reamin_runs; ++j){
-            feedInput(&infile[j], input_buffer[j],input_size);
+            t_init_inputBuffer[j] = std::thread(feedInput, &infile[j], input_buffer[j], input_size);
+        }
+        for(int j = 0; j < num_of_reamin_runs; ++j){
+            t_init_inputBuffer[j].join();
+        }
+        // init loser tree
+        for(int j = 0; j < num_of_reamin_runs; ++j){
+            // feedInput(&infile[j], input_buffer[j],input_size);
             loser_tree.__insert_start(input_buffer[j][0],j,false);
         }
         loser_tree.__init();
@@ -212,10 +223,15 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
             if(output_po == output_size){
                 std::swap(output_buffer_tree, output_buffer_disk);
                 // write to disk 
-                writeDisk(new_name, output_buffer_disk, output_size);
+                if(t_writeDisk.joinable())
+                    t_writeDisk.join();
+                t_writeDisk = std::thread(writeDisk, new_name, output_buffer_disk, output_size);
+                // writeDisk(new_name, output_buffer_disk, output_size);
                 output_po = 0;
             }
         } 
+        if(t_writeDisk.joinable())
+            t_writeDisk.join();
         // final writeDisk
         std::swap(output_buffer_tree, output_buffer_disk);
         writeDisk(new_name,output_buffer_disk, output_po);
@@ -224,10 +240,15 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
         for(int j = 0; j < num_of_reamin_runs; ++j){
             infile[j].close();
         }
+        // gc
         delete []output_buffer_tree;
         delete []output_buffer_disk;
+        for(int j = 0; j < k; ++j){
+            delete[] input_buffer[j];
+        }
+        delete[] input_buffer;
     } 
-    
+
     return mergeFiles(i/k, k, epoch, input_size, output_size);
 }
 
@@ -236,16 +257,19 @@ void mergeFiles(int num, int k, int epoch, int input_size, int output_size){
 int main()
 {
     // input file的分块数量
-    int num_ways = 10;
+    constexpr int num_ways = 10;
  
     // 每块的大小
-    int run_size = 2000;
+    constexpr int run_size = 2000;
 
     // input size
-    int input_size = 50;
+    constexpr int input_size = 50;
 
     // output_size
-    int output_size = 500;
+    constexpr int output_size = 500;
+
+    // k-way merge
+    constexpr int num_of_way_merge = 8;
  
     std::string input_file = "input.txt";
  
@@ -266,7 +290,7 @@ int main()
     lab5::createInitialRuns(input_file, run_size, num_ways);
  
     // Merge the runs using the k–way merging
-    lab5::mergeFiles(num_ways, 8, 0, input_size, output_size);
+    lab5::mergeFiles(num_ways, num_of_way_merge, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
     return 0;

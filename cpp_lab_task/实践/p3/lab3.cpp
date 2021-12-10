@@ -184,7 +184,7 @@ int main()
     // 分配每个run临时的输出文件
     lab3::createInitialRuns(input_file, run_size, num_ways);
  
-    // Merge the runs using the k–way merging
+    // Merge the runs 
     lab3::mergeFiles(num_ways, 0, input_size, output_size);
     
     printf("Time taken: %.2fs\n", (double)(clock() - start)/CLOCKS_PER_SEC);
