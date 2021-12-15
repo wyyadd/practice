@@ -9,12 +9,14 @@
 #include <unordered_map>
 #include <vector>
 #include <stack>
+#include <set>
 
 namespace Lexical {
     using std::string;
     using std::unordered_map;
     using std::vector;
     using std::pair;
+    using std::set;
 
 
     // NFA node
@@ -56,15 +58,19 @@ namespace Lexical {
 
         void ShowNFA();
 
-    private:
+        vector<NFA *> getNfa();
+        set<char> getCharSet();
 
+    private:
         // 预处理正则表达式: 在第一位是操作数、‘*’或‘)’且第二位是操作数或‘(’之间加入连接符‘&’
         static string PreprocessInfixRegex(string &regex);
 
         // stack的top两个元素串行合并
         static void LinkNFA(std::stack<NFASet> &stack);
 
+    private:
         vector<NFA *> nfa_;
+        std::set<char> charSet_;
         string infix_regex_;
         string suffix_regex_;
         unordered_map<char, int> in_stack_priority_;
