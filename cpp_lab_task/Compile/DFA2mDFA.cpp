@@ -14,6 +14,7 @@ namespace Lexical {
     DFA2mDFA::DFA2mDFA(vector<DFA *> DFA, set<char> charSet) : DFA_(std::move(DFA)), charSet_(std::move(charSet)) {}
 
     void DFA2mDFA::GenerateGroup() {
+        set<int> acceptSet;
         // init
         auto *ac = new Group;
         auto *no_ac = new Group;
@@ -85,12 +86,19 @@ namespace Lexical {
         for (auto &i: Group_) {
             mDFA *mDfa = mDFA_[state];
             mDfa->state_ = state++;
-            // set start and end
-            if (i->member_.contains(0))
-                entry = mDfa;
-            if (i->member_.contains((int) DFA_.size() - 1))
-                exit = mDfa;
-
+            // set entry and exit
+            for(auto &dfa : i->member_){
+               if(DFA_[dfa]->state_ == 0) {
+                   entry = mDfa;
+                   break;
+               }
+            }
+            for(auto &dfa : i->member_){
+                if(DFA_[dfa]->acceptable){
+                    mDfa->acceptable = true;
+                    break;
+                }
+            }
             // init mDFA
             auto dfa = DFA_[*i->member_.begin()];
             for (auto &j: dfa->links_)
@@ -98,14 +106,20 @@ namespace Lexical {
         }
         // unreachable
         ReduceRedundancy(entry);
-        CacheInfiniteLoop();
-
+        // delete unreachable node
         for (int i = (int) mDFA_.size() - 1; i >= 0; --i) {
             if (mDFA_[i]->dead) {
                 delete mDFA_[i];
                 mDFA_.erase(std::next(mDFA_.begin(), i));
             }
         }
+        // set exit set
+        for(auto m_dfa : mDFA_){
+            if(m_dfa->acceptable)
+                exit.insert(m_dfa);
+        }
+        // loop itself
+        CacheInfiniteLoop();
     }
 
     int DFA2mDFA::getGroupState(int s) {
@@ -136,14 +150,17 @@ namespace Lexical {
                     break;
                 }
             }
-            if (flag && i != exit)
+            if (flag && !exit.contains(i))
                 i->infiniteLoop = true;
         }
     }
 
     void DFA2mDFA::Show_mDFA() {
         printf("----------mDFA---------\n");
-        printf("start state:%d, end state:%d\n",entry->state_, exit->state_);
+        printf("start state:%d, end state:",entry->state_);
+        for(auto &e : exit)
+            printf("%d,",e->state_);
+        printf("\n");
         for (auto &i: mDFA_) {
             printf("state %d:{ ", i->state_);
             for (auto j: i->links_) {
@@ -158,7 +175,7 @@ namespace Lexical {
     }
 
     bool DFA2mDFA::walkThroughDFA(const std::string &s, int po, mDFA *m_dfa) {
-        if (m_dfa == exit && po == s.size())
+        if (exit.contains(m_dfa) && po == s.size())
             return true;
         if(m_dfa->infiniteLoop)
             return false;

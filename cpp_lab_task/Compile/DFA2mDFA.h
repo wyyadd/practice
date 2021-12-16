@@ -19,6 +19,7 @@ namespace Lexical {
         int state_;
         bool dead = true;
         bool infiniteLoop = false;
+        bool acceptable = false;
         vector<std::pair<char, mDFA*>> links_;
     };
 
@@ -55,7 +56,7 @@ namespace Lexical {
         vector<Group *> Group_;
         vector<mDFA *> mDFA_;
         mDFA *entry = nullptr;
-        mDFA *exit = nullptr;
+        set<mDFA*> exit ;
     };
 }
 #endif //COMPILE_DFA2mDFA_H
