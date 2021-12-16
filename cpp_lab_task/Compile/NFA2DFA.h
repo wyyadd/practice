@@ -22,6 +22,7 @@ namespace Lexical {
         }
 
         int state_;
+        bool acceptable = false;
         vector<std::pair<char, int>> links_;
     };
 
@@ -50,6 +51,8 @@ namespace Lexical {
         int Get_DStates(const std::set<int> &states);
 
         void ShowDFA();
+
+        vector<DFA*> getDFA();
 
     private:
         const vector<NFA *> nfa_;

@@ -5,6 +5,7 @@
 #ifndef COMPILE_RE2NFA_H
 #define COMPILE_RE2NFA_H
 
+#include <utility>
 #include <string>
 #include <unordered_map>
 #include <vector>

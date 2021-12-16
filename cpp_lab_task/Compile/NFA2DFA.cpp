@@ -4,8 +4,6 @@
 
 #include "NFA2DFA.h"
 
-#include <utility>
-
 namespace Lexical {
 
     NFA2DFA::NFA2DFA(vector<NFA *> nfa, set<char> charSet) : nfa_(std::move(nfa)), charSet_(std::move(charSet)) {}
@@ -23,6 +21,8 @@ namespace Lexical {
             stack.pop();
             for (char c: charSet_) {
                 auto U = e_closure(Move(T->NFAStates_, c));
+                if(U.empty())
+                    continue;
                 int U_state = Get_DStates(U);
                 if (U_state == -1) {
                     D_states_.emplace_back(new D_state(U, state));
@@ -32,6 +32,12 @@ namespace Lexical {
                 }
                 D_tran_[T->state_]->links_.emplace_back(std::make_pair(c, U_state));
             }
+        }
+
+        auto acceptState = (int)nfa_.size() - 1;
+        for(auto &i : D_states_){
+            if(i->NFAStates_.contains(acceptState))
+                D_tran_[i->state_]->acceptable = true;
         }
     }
 
@@ -43,7 +49,7 @@ namespace Lexical {
         while (!stack.empty()) {
             auto n = stack.top();
             stack.pop();
-            for (auto i: n->epsilon_) {
+            for (auto &i: n->epsilon_) {
                 if (!result.contains(i))
                     stack.push(nfa_[i]);
                 result.insert(i);
@@ -54,9 +60,9 @@ namespace Lexical {
 
     std::set<int> NFA2DFA::e_closure(const std::vector<NFA *> &T) {
         std::set<int> result;
-        for (auto i: T) {
+        for (auto &i: T) {
             auto s = e_closure(i);
-            for (auto j: s) {
+            for (auto &j: s) {
                 result.insert(j);
             }
         }
@@ -66,21 +72,21 @@ namespace Lexical {
     std::vector<NFA *> NFA2DFA::Move(const std::set<int> &T, char c) {
         std::set<int> state_set;
         std::vector<NFA *> result;
-        for (auto n: T) {
-            for (auto l: nfa_[n]->links_) {
+        for (auto &n: T) {
+            for (auto &l: nfa_[n]->links_) {
                 if (l.first == c) {
                     state_set.insert(l.second);
                 }
             }
         }
         result.reserve(state_set.size());
-        for (auto i: state_set)
+        for (auto &i: state_set)
             result.push_back(nfa_[i]);
         return result;
     }
 
     int NFA2DFA::Get_DStates(const std::set<int> &states) {
-        for(auto i : D_states_){
+        for(auto &i : D_states_){
             if (i->NFAStates_ == states)
                 return i->state_;
         }
@@ -89,15 +95,19 @@ namespace Lexical {
 
     void NFA2DFA::ShowDFA() {
         printf("----------DFA---------\n");
-        for (auto i: D_tran_) {
+        for (auto &i: D_tran_) {
             printf("state %d: [", i->state_);
-            for(auto j : D_states_[i->state_]->NFAStates_)
+            for(auto &j : D_states_[i->state_]->NFAStates_)
                 printf("%d,",j);
             printf("], next state: {");
-            for (auto j: i->links_) {
+            for (auto &j: i->links_) {
                 printf("---%c--->%d, ", j.first, j.second);
             }
             printf("}\n");
         }
+    }
+
+    vector<DFA*> NFA2DFA::getDFA() {
+        return D_tran_;
     }
 }
