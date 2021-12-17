@@ -9,12 +9,16 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <memory>
 #include "Re2NFA.h"
 
 
 namespace Lexical {
     using std::vector;
     using std::set;
+    using std::unique_ptr;
+    using std::shared_ptr;
+    using std::pair;
 
     struct DFA {
         explicit DFA(int state) {
@@ -23,42 +27,46 @@ namespace Lexical {
 
         int state_;
         bool acceptable = false;
-        vector<std::pair<char, int>> links_;
+        vector<pair<char, int>> links_;
     };
 
     struct D_state {
-        D_state(std::set<int> NFAStates, int state) {
+        D_state(set<int> NFAStates, int state) {
             NFAStates_ = std::move(NFAStates);
             state_ = state;
         }
 
-        std::set<int> NFAStates_;
+        set<int> NFAStates_;
         int state_;
     };
 
     class NFA2DFA {
     public:
-        explicit NFA2DFA(vector<NFA *> nfa, set<char> charSet);
+        explicit NFA2DFA(vector<shared_ptr<NFA *>> nfa, set<char> charSet);
 
         void GenerateDFA();
 
-        std::set<int> e_closure(NFA *nfa);
+        // 求单个nfa节点的epsilon闭包
+        set<int> e_closure(NFA *nfa);
 
-        std::set<int> e_closure(const std::vector<NFA *> &T);
+        // 求nfa集合的闭包
+        set<int> e_closure(const vector<NFA *> &T);
 
-        std::vector<NFA *> Move(const std::set<int> &T, char c);
+        // 求该nfa集合通过字符c转移到的nfa集合
+        vector<NFA *> Move(const set<int> &T, char c);
 
-        int Get_DStates(const std::set<int> &states);
+        // 求该nfa集合对应的dfa状态
+        int Get_DStates(const set<int> &states);
 
         void ShowDFA();
 
-        vector<DFA*> getDFA();
+        vector<shared_ptr<DFA *>> &getDFA();
 
     private:
-        const vector<NFA *> nfa_;
-        const std::set<char> charSet_;
-        vector<D_state *> D_states_;
-        vector<DFA *> D_tran_;
+        const vector<shared_ptr<NFA *>> nfa_;
+        const set<char> charSet_;
+        vector<unique_ptr<D_state *>> D_states_;
+        vector<shared_ptr<DFA *>> D_tran_;
     };
 
 }

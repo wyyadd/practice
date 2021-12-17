@@ -8,19 +8,22 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <memory>
 #include "NFA2DFA.h"
 
 namespace Lexical {
     using std::vector;
     using std::set;
     using std::stack;
+    using std::unique_ptr;
+    using std::shared_ptr;
 
     struct mDFA {
         int state_;
         bool dead = true;
         bool infiniteLoop = false;
         bool acceptable = false;
-        vector<std::pair<char, mDFA*>> links_;
+        vector<std::pair<char, mDFA *>> links_;
     };
 
     struct Group {
@@ -29,34 +32,41 @@ namespace Lexical {
 
     class DFA2mDFA {
     public:
-        explicit DFA2mDFA(vector<DFA *> DFA, set<char> charSet);
+        explicit DFA2mDFA(vector<shared_ptr<DFA *>> DFA, set<char> charSet);
 
         void GenerateGroup();
 
+        // group g的每一个dfa，move(dfa, c)不属于g， 则认为该dfa不在g组
+        // ture means same group
+        // false means different group
         bool DivideGroup(Group *g, char c, stack<Group *> &s);
 
         void Generate_mDFA();
 
+        // 判断dfa状态所属的group
         int getGroupState(int s);
 
+        // delete mDFA which cannot be reached from entry
         void ReduceRedundancy(mDFA *start);
 
+        // mark mDFA which is not exit node and its links always point to itself
         void CacheInfiniteLoop();
 
         void Show_mDFA();
 
-        bool Check(const std::string& s);
+        // 判断字符串是否满足正则规则
+        bool Check(const std::string &s);
 
         bool walkThroughDFA(const std::string &s, int po, mDFA *m_dfa);
 
 
     private:
-        const vector<DFA *> DFA_;
+        const vector<shared_ptr<DFA *>> DFA_;
         const set<char> charSet_;
-        vector<Group *> Group_;
-        vector<mDFA *> mDFA_;
+        vector<unique_ptr<Group *>> Group_;
+        vector<unique_ptr<mDFA *>> mDFA_;
         mDFA *entry = nullptr;
-        set<mDFA*> exit ;
+        set<mDFA *> exit;
     };
 }
 #endif //COMPILE_DFA2mDFA_H

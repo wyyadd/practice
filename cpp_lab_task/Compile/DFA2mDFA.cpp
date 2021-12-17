@@ -7,11 +7,9 @@
 #include <utility>
 
 namespace Lexical {
-    using std::vector;
-    using std::set;
-    using std::stack;
 
-    DFA2mDFA::DFA2mDFA(vector<DFA *> DFA, set<char> charSet) : DFA_(std::move(DFA)), charSet_(std::move(charSet)) {}
+    DFA2mDFA::DFA2mDFA(vector<shared_ptr<DFA *>> DFA, set<char> charSet) : DFA_(std::move(DFA)),
+                                                                           charSet_(std::move(charSet)) {}
 
     void DFA2mDFA::GenerateGroup() {
         set<int> acceptSet;
@@ -19,10 +17,10 @@ namespace Lexical {
         auto *ac = new Group;
         auto *no_ac = new Group;
         for (auto &i: DFA_) {
-            if (i->acceptable)
-                ac->member_.insert(i->state_);
+            if ((*i)->acceptable)
+                ac->member_.insert((*i)->state_);
             else
-                no_ac->member_.insert(i->state_);
+                no_ac->member_.insert((*i)->state_);
         }
         stack<Group *> G_stack;
         G_stack.push(ac);
@@ -36,14 +34,13 @@ namespace Lexical {
                 // true means cannot divide
                 // false means can divide
                 if (!DivideGroup(g, c, G_stack)) {
-                    delete g;
                     g_delete = true;
                     break;
                 }
             }
             // mean not deleted
             if (!g_delete)
-                Group_.emplace_back(g);
+                Group_.emplace_back(std::make_unique<Group *>(g));
         }
     }
 
@@ -52,7 +49,7 @@ namespace Lexical {
             return true;
         auto *A = new Group;
         for (auto i: g->member_) {
-            auto dfa = DFA_[i];
+            auto dfa = *DFA_[i];
             for (auto j: dfa->links_) {
                 if (j.first == c) {
                     if (!g->member_.contains(j.second)) {
@@ -63,7 +60,6 @@ namespace Lexical {
             }
         }
         if (A->member_.empty()) {
-            delete A;
             return true;
         } else {
             if (A->member_.size() == g->member_.size())
@@ -82,41 +78,41 @@ namespace Lexical {
     void DFA2mDFA::Generate_mDFA() {
         int state = 0;
         for (auto i = 0; i < Group_.size(); ++i)
-            mDFA_.emplace_back(new mDFA);
+            mDFA_.emplace_back(std::make_unique<mDFA *>(new mDFA));
         for (auto &i: Group_) {
-            mDFA *mDfa = mDFA_[state];
+            mDFA *mDfa = *mDFA_[state];
             mDfa->state_ = state++;
             // set entry and exit
-            for(auto &dfa : i->member_){
-               if(DFA_[dfa]->state_ == 0) {
-                   entry = mDfa;
-                   break;
-               }
+            for (auto &dfa: (*i)->member_) {
+                if ((*DFA_[dfa])->state_ == 0) {
+                    entry = mDfa;
+                    break;
+                }
             }
-            for(auto &dfa : i->member_){
-                if(DFA_[dfa]->acceptable){
+            for (auto &dfa: (*i)->member_) {
+                if ((*DFA_[dfa])->acceptable) {
                     mDfa->acceptable = true;
                     break;
                 }
             }
             // init mDFA
-            auto dfa = DFA_[*i->member_.begin()];
+            auto dfa = *DFA_[*(*i)->member_.begin()];
             for (auto &j: dfa->links_)
-                mDfa->links_.emplace_back(std::make_pair(j.first, mDFA_[getGroupState(j.second)]));
+                mDfa->links_.emplace_back(std::make_pair(j.first, *mDFA_[getGroupState(j.second)]));
         }
         // unreachable
         ReduceRedundancy(entry);
         // delete unreachable node
         for (int i = (int) mDFA_.size() - 1; i >= 0; --i) {
-            if (mDFA_[i]->dead) {
-                delete mDFA_[i];
+            if ((*mDFA_[i])->dead) {
                 mDFA_.erase(std::next(mDFA_.begin(), i));
             }
         }
         // set exit set
-        for(auto m_dfa : mDFA_){
-            if(m_dfa->acceptable)
-                exit.insert(m_dfa);
+        for (auto &m_dfa: mDFA_) {
+            auto m = *m_dfa;
+            if ((m->acceptable))
+                exit.insert(m);
         }
         // loop itself
         CacheInfiniteLoop();
@@ -124,7 +120,7 @@ namespace Lexical {
 
     int DFA2mDFA::getGroupState(int s) {
         for (auto i = 0; i < Group_.size(); ++i) {
-            if (Group_[i]->member_.contains(s))
+            if ((*Group_[i])->member_.contains(s))
                 return i;
         }
         throw std::runtime_error("error");
@@ -144,26 +140,26 @@ namespace Lexical {
         // loop itself node
         for (auto &i: mDFA_) {
             bool flag = true;
-            for (auto j: i->links_) {
-                if (j.second != i) {
+            for (auto j: (*i)->links_) {
+                if (j.second != *i) {
                     flag = false;
                     break;
                 }
             }
-            if (flag && !exit.contains(i))
-                i->infiniteLoop = true;
+            if (flag && !exit.contains(*i))
+                (*i)->infiniteLoop = true;
         }
     }
 
     void DFA2mDFA::Show_mDFA() {
         printf("----------mDFA---------\n");
-        printf("start state:%d, end state:",entry->state_);
-        for(auto &e : exit)
-            printf("%d,",e->state_);
+        printf("start state:%d, end state:", entry->state_);
+        for (auto &e: exit)
+            printf("%d,", e->state_);
         printf("\n");
         for (auto &i: mDFA_) {
-            printf("state %d:{ ", i->state_);
-            for (auto j: i->links_) {
+            printf("state %d:{ ", (*i)->state_);
+            for (auto j: (*i)->links_) {
                 printf("---%c--->%d, ", j.first, j.second->state_);
             }
             printf("}\n");
@@ -177,7 +173,7 @@ namespace Lexical {
     bool DFA2mDFA::walkThroughDFA(const std::string &s, int po, mDFA *m_dfa) {
         if (exit.contains(m_dfa) && po == s.size())
             return true;
-        if(m_dfa->infiniteLoop)
+        if (m_dfa->infiniteLoop)
             return false;
         for (auto &i: m_dfa->links_) {
             if (i.first == s[po]) {

@@ -89,14 +89,14 @@ namespace Lexical {
         int state = 0;
         std::stack<NFASet> stack;
         NFA *head = new NFA(state++);
-        nfa_.emplace_back(head);
+        nfa_.emplace_back(std::make_unique<NFA *>(head));
         stack.push(NFASet(head, '0'));
 
         for (char i: suffix_regex_) {
             // 若为字母， 创建一个新的NFAnet，压入stack
             if (i >= 'a' && i <= 'z') {
                 NFA *n = new NFA(state++);
-                nfa_.emplace_back(n);
+                nfa_.emplace_back(std::make_unique<NFA *>(n));
                 stack.push(NFASet(n, i));
                 continue;
             }
@@ -112,7 +112,7 @@ namespace Lexical {
                     A.NFAs_head.emplace_back(j);
                 // n作为A,B共同的尾部
                 NFA *n = new NFA(state++);
-                nfa_.emplace_back(n);
+                nfa_.emplace_back(std::make_unique<NFA *>(n));
                 B.NFAs_tail->links_.emplace_back(std::make_pair('~', n->state_));
                 B.NFAs_tail->epsilon_.emplace_back(n->state_);
                 A.NFAs_tail->links_.emplace_back(std::make_pair('~', n->state_));
@@ -127,7 +127,7 @@ namespace Lexical {
                 assert(stack.size() > 1);
                 // 创建一个新的NFA
                 NFA *n = new NFA(state++);
-                nfa_.emplace_back(n);
+                nfa_.emplace_back(std::make_unique<NFA *>(n));
                 auto A = stack.top();
                 stack.pop();
                 // NFASet尾部通过epsilon指向NFA
@@ -159,19 +159,19 @@ namespace Lexical {
     void Re2NFA::ShowNFA() {
         printf("-----NFA-----\n(~ = epsilon)\n");
         for (auto &i: nfa_) {
-            printf("state %d, next state: {", i->state_);
-            for (auto &j: i->links_) {
+            printf("state %d, next state: {", (*i)->state_);
+            for (auto &j: (*i)->links_) {
                 printf("--%c-->%d, ", j.first, j.second);
             }
             printf("}, epsilon: {");
-            for (auto &k: i->epsilon_) {
+            for (auto &k: (*i)->epsilon_) {
                 printf("--~-->%d, ", k);
             }
             printf("}\n");
         }
     }
 
-    vector<NFA *> Re2NFA::getNfa() {
+    vector<shared_ptr<NFA *>> &Re2NFA::getNfa() {
         return nfa_;
     }
 

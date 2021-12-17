@@ -11,6 +11,7 @@
 #include <vector>
 #include <stack>
 #include <set>
+#include <memory>
 
 namespace Lexical {
     using std::string;
@@ -18,6 +19,9 @@ namespace Lexical {
     using std::vector;
     using std::pair;
     using std::set;
+    using std::stack;
+    using std::unique_ptr;
+    using std::shared_ptr;
 
 
     // NFA node
@@ -29,7 +33,7 @@ namespace Lexical {
         // 节点状态
         int state_;
         // 该节点指向位置 char->弧上的值，int->指向节点状态
-        vector<std::pair<char, int>> links_;
+        vector<pair<char, int>> links_;
         // epsilon 指向节点
         vector<int> epsilon_;
     };
@@ -42,7 +46,7 @@ namespace Lexical {
         }
 
         // 指向该NFA集合头部所有NFA
-        std::vector<std::pair<char, NFA *>> NFAs_head;
+        vector<pair<char, NFA *>> NFAs_head;
         // NFA集合的尾部
         NFA *NFAs_tail;
     };
@@ -59,7 +63,8 @@ namespace Lexical {
 
         void ShowNFA();
 
-        vector<NFA *> getNfa();
+        vector<shared_ptr<NFA *>> &getNfa();
+
         set<char> getCharSet();
 
     private:
@@ -67,10 +72,10 @@ namespace Lexical {
         static string PreprocessInfixRegex(string &regex);
 
         // stack的top两个元素串行合并
-        static void LinkNFA(std::stack<NFASet> &stack);
+        static void LinkNFA(stack<NFASet> &stack);
 
     private:
-        vector<NFA *> nfa_;
+        vector<shared_ptr<NFA *>> nfa_;
         std::set<char> charSet_;
         string infix_regex_;
         string suffix_regex_;
