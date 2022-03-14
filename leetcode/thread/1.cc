@@ -10,12 +10,12 @@ void PrintString_1()
         int cnt = 0;
         while(cnt<10)
         {
-                // while(flag != 'A')
-                //         cv.wait(lk);
+                while(flag != 'A')
+                        cv.wait(lk);
                 std::cout<<'A'<<std::endl;
-                // ++flag;
+                ++flag;
                 cnt++;
-                // cv.notify_all();
+                cv.notify_all();
         }
 }
 
@@ -25,12 +25,12 @@ void PrintString_2()
         int cnt = 0;
         while(cnt<10)
         {
-                // while(flag != 'B')
-                //         cv.wait(lk);
+                while(flag != 'B')
+                        cv.wait(lk);
                 std::cout<<'B'<<std::endl;
-                // ++flag;
+                ++flag;
                 cnt++;
-                // cv.notify_all();
+                cv.notify_all();
         }
 }
 
@@ -40,12 +40,12 @@ void PrintString_3()
         int cnt = 0;
         while(cnt<10)
         {
-                // while(flag != 'C')
-                //         cv.wait(lk);
+                while(flag != 'C')
+                        cv.wait(lk);
                 std::cout<<'C'<<std::endl;
-                // flag = 'A';
+                flag = 'A';
                 cnt++;
-                // cv.notify_all();
+                cv.notify_all();
         }
 }
 
